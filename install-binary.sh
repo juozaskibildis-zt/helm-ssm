@@ -42,7 +42,7 @@ initOS() {
 # verifySupported checks that the os/arch combination is supported for
 # binary builds.
 verifySupported() {
-  local supported="linux-amd64\nmacos-amd64\nwindows-amd64"
+  local supported="linux-armv7\nlinux-armv6\nlinux-amd64\nmacos-amd64\nwindows-amd64"
   if ! echo "${supported}" | grep -q "${OS}-${ARCH}"; then
     echo "No prebuild binary for ${OS}-${ARCH}."
     exit 1
@@ -58,8 +58,9 @@ verifySupported() {
 getDownloadURL() {
   # Use the GitHub API to find the latest version for this project.
   local latest_url="https://api.github.com/repos/$PROJECT_GH/releases/latest"
+  ARM=$(echo "$ARCH" | grep -oe "arm" | sed 's/arm/-arm/g')
   if type "curl" > /dev/null; then
-    DOWNLOAD_URL=$(curl -s $latest_url | grep $OS | awk '/"browser_download_url":/{gsub( /[,"]/,"", $2); print $2}')
+    DOWNLOAD_URL=$(curl -s $latest_url | grep $OS$ARM.tgz | awk '/"browser_download_url":/{gsub( /[,"]/,"", $2); print $2}')
   elif type "wget" > /dev/null; then
     DOWNLOAD_URL=$(wget -q -O - $latest_url | awk '/"browser_download_url":/{gsub( /[,"]/,"", $2); print $2}')
   fi
